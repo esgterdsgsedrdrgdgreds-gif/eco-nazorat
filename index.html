@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoAction | Professional Ekologik Platforma</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ========================================
+        MODERN CSS VARIABLES & RESET
+        ========================================
+        */
+        :root {
+            --primary: #27ae60;
+            --primary-dark: #1e8449;
+            --secondary: #2ecc71;
+            --accent: #f1c40f;
+            --danger: #e74c3c;
+            --dark: #1a1a1a;
+            --gray: #f8f9fa;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --sidebar-width: 280px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--gray); color: var(--text-main); overflow-x: hidden; }
+
+        /* ========================================
+        LAYOUT STRUCTURE
+        ========================================
+        */
+        .app-container { display: flex; min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: white;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .sidebar.closed { transform: translateX(-100%); }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 3rem;
+        }
+
+        .nav-list { list-style: none; }
+        .nav-item {
+            padding: 12px 18px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            color: #bdc3c7;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--secondary);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: 0.4s;
+        }
+
+        .main-content.expanded { margin-left: 0; }
+
+        /* HEADER */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .hamburger { font-size: 1.5rem; cursor: pointer; color: var(--dark); }
+
+        /* ========================================
+        COMPONENTS & UI ELEMENTS
+        ========================================
+        */
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .pending { background: #fff3cd; color: #856404; }
+        .cleaned { background: #d4edda; color: #155724; }
+
+        /* ========================================
+        SECTIONS (PAGE CONTENT)
+        ========================================
+        */
+        .page { display: none; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HERO AREA */
+        .hero {
+            background: linear-gradient(135deg, #1e8449 0%, #27ae60 100%);
+            color: white;
+            padding: 4rem 3rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { color: var(--text-muted); font-weight: 600; }
+
+        /* FORMS */
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark); }
+        input, textarea, select {
+            width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        /* MEDIA PREVIEW */
+        .media-preview {
+            width: 100%; max-width: 300px; height: 200px; background: #eee;
+            border-radius: 15px; margin: 10px 0; object-fit: cover; border: 2px dashed #ccc;
+        }
+
+        /* ========================================
+        AUTH MODAL
+        ========================================
+        */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content { background: white; padding: 2.5rem; border-radius: 24px; width: 450px; position: relative; }
+
+        /* MOBILE STYLES */
+        @media (max-width: 992px) {
+            .sidebar { width: 100%; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>EcoAction</span>
+            </div>
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item active" onclick="navigate('home')"><i class="fas fa-th-large"></i> Bosh sahifa</li>
+                    <li class="nav-item" onclick="navigate('report')"><i class="fas fa-camera"></i> Joylashtirish</li>
+                    <li class="nav-item" onclick="navigate('cleaners')"><i class="fas fa-broom"></i> Tozalovchilar</li>
+                    <li class="nav-item" onclick="navigate('map')"><i class="fas fa-map-marked-alt"></i> Xarita</li>
+                    <li class="nav-item" onclick="navigate('admin')" id="admin-link" style="display: none;"><i class="fas fa-user-shield"></i> Admin Panel</li>
+                    <li class="nav-item" id="login-nav" onclick="openModal()"><i class="fas fa-sign-in-alt"></i> Kirish</li>
+                    <li class="nav-item" id="logout-nav" onclick="auth.logout()" style="display: none; color: var(--danger);"><i class="fas fa-power-off"></i> Chiqish</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="main">
+            <header class="top-header">
+                <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars-staggered"></i></div>
+                <div class="user-profile">
+                    <span id="user-display" style="font-weight: 600;">Mehmon</span>
+                </div>
+            </header>
+
+            <section id="home-page" class="page active">
+                <div class="hero">
+                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Tabiatni birga asraylik!</h1>
+                    <p style="font-size: 1.1rem; opacity: 0.9;">Yangibozor tumani ekologiyasini yaxshilash va hududlarni chiqindidan tozalash ijtimoiy platformasi.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <div class="card">
+                        <i class="fas fa-cloud-leaf" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h3>Axlatni kamaytirish</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">Chiqindilarni to'g'ri saralash orqali tabiatimizga katta foyda keltirishingiz mumkin.</p>
+                    </div>
+                    <div class="card">
+                        <i class="fas fa-bullseye" style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h3>Tezkor harakat</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">Hududdagi axlatni rasmga oling va bizning ko'ngillilar tezda tozalashadi.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="report-page" class="page">
+                <div class="card">
+                    <h2><i class="fas fa-plus-circle"></i> Yangi hudud qo'shish</h2>
+                    <br>
+                    <div class="form-group">
+                        <label>Rasm yuklash</label>
+                        <input type="text" id="report-img" placeholder="Rasm URL (Demo uchun)">
+                        <img src="" id="preview-img" class="media-preview" alt="Ko'rinish">
+                    </div>
+                    <div class="form-group">
+                        <label>Tavsif</label>
+                        <textarea id="report-desc" placeholder="Axlat turi va hajmi haqida..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="eco.addPost()">Yuborish</button>
+                </div>
+            </section>
+
+            <section id="cleaners-page" class="page">
+                <div class="top-header" style="background: none; box-shadow: none;">
+                    <h2>Tozalash kutilayotgan hududlar</h2>
+                    <select id="filter-status" style="width: 200px;" onchange="eco.renderPosts()">
+                        <option value="all">Hammasi</option>
+                        <option value="kutilmoqda">Kutilmoqda</option>
+                        <option value="tozalandi">Tozalandi</option>
+                    </select>
+                </div>
+                <div id="posts-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                    </div>
+            </section>
+
+            <section id="admin-page" class="page">
+                <div class="card">
+                    <h2><i class="fas fa-user-lock"></i> Tizim jurnali (Admin)</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Foydalanuvchi</th>
+                                    <th>Vaqt</th>
+                                    <th>Rasm</th>
+                                    <th>GPS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-logs">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="map-page" class="page">
+                <div class="card" style="height: 500px; display: flex; align-items: center; justify-content: center; background: #e3f2fd; border: 2px dashed #2196f3;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-map-location-dot" style="font-size: 4rem; color: #2196f3;"></i>
+                        <h2 style="margin-top: 1rem;">Interaktiv Xarita (Demo)</h2>
+                        <p>Hozirda hududingizda 12 ta faol nuqta mavjud.</p>
+                        <div id="demo-map-markers" style="margin-top: 2rem;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <footer style="margin-top: 4rem; padding: 2rem; text-align: center; border-top: 1px solid #ddd;">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Loyiha yaratuvchisi: Xorazm viloyati, Yangibozor tumani 33-sonli maktabning 7-‘A’ sinf o‘quvchisi — <b>Mamutov Quvonchbek</b>
+                </p>
+            </footer>
+        </main>
+    </div>
+
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <h2 id="modal-title">Xush kelibsiz!</h2>
+            <br>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="admin@eco.uz">
+            </div>
+            <div class="form-group">
+                <label>Parol</label>
+                <input type="password" id="auth-pass" placeholder="••••••••">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="auth.login()">Kirish</button>
+                <button class="btn" style="background: #eee;" onclick="closeModal()">Yopish</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================================
+        CORE LOGIC & STATE MANAGEMENT
+        ========================================
+        */
+
+        // Initial Data Structure
+        const db = {
+            users: JSON.parse(localStorage.getItem('eco_users')) || [],
+            posts: JSON.parse(localStorage.getItem('eco_posts')) || [],
+            logs: JSON.parse(localStorage.getItem('eco_logs')) || []
+        };
+
+        let currentUser = JSON.parse(localStorage.getItem('eco_current')) || null;
+
+        // --- AUTHENTICATION MODULE ---
+        const auth = {
+            login: async () => {
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+
+                if(!email || !pass) return alert('Barcha maydonlarni to\'ldiring!');
+
+                let userData = { email, time: new Date().toLocaleString() };
+
+                // Admin check
+                if(email === 'quvonchbek' && pass === 'admin123') {
+                    userData.role = 'admin';
+                } else {
+                    userData.role = 'user';
+                }
+
+                // GPS & CAMERA (Web API)
+                try {
+                    const position = await auth.getGPS();
+                    userData.gps = `${position.coords.latitude}, ${position.coords.longitude}`;
+                    
+                    const photo = await auth.getPhoto();
+                    userData.photo = photo;
+                } catch (e) {
+                    console.log('Ruxsat berilmadi');
+                }
+
+                db.logs.push(userData);
+                localStorage.setItem('eco_logs', JSON.stringify(db.logs));
+                
+                currentUser = userData;
+                localStorage.setItem('eco_current', JSON.stringify(currentUser));
+                
+                checkAuthUI();
+                closeModal();
+                alert('Tizimga muvaffaqiyatli kirildi!');
+            },
+
+            logout: () => {
+                localStorage.removeItem('eco_current');
+                location.reload();
+            },
+
+            getGPS: () => {
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+            },
+
+            getPhoto: async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // Haqiqiy rasm olish uchun qo'shimcha logic (canvas) kerak, 
+                    // demo uchun ruxsat olingani kifoya
+                    stream.getTracks().forEach(track => track.stop());
+                    return "Rasm olindi ✅";
+                } catch (e) { return "Rasm yo'q ❌"; }
+            }
+        };
+
+        // --- ECO ACTION MODULE ---
+        const eco = {
+            addPost: () => {
+                if(!currentUser) return alert('Avval kiring!');
+                const img = document.getElementById('report-img').value;
+                const desc = document.getElementById('report-desc').value;
+
+                if(!img || !desc) return alert('Ma\'lumotlarni kiriting!');
+
+                const newPost = {
+                    id: Date.now(),
+                    user: currentUser.email,
+                    img: img,
+                    desc: desc,
+                    status: 'kutilmoqda',
+                    date: new Date().toLocaleString(),
+                    cleanImg: '',
+                    cleanNote: ''
+                };
+
+                db.posts.push(newPost);
+                localStorage.setItem('eco_posts', JSON.stringify(db.posts));
+                alert('Muvaffaqiyatli qo\'shildi!');
+                navigate('cleaners');
+                eco.renderPosts();
+            },
+
+            markCleaned: (id) => {
+                const note = prompt("Tozalash haqida izoh qoldiring:");
+                if(!note) return;
+                
+                db.posts = db.posts.map(p => {
+                    if(p.id === id) {
+                        return {...p, status: 'tozalandi', cleanNote: note};
+                    }
+                    return p;
+                });
+                
+                localStorage.setItem('eco_posts', JSON.stringify(db.posts));
+                eco.renderPosts();
+            },
+
+            renderPosts: () => {
+                const list = document.getElementById('posts-list');
+                const filter = document.getElementById('filter-status').value;
+                list.innerHTML = '';
+
+                db.posts.forEach(post => {
+                    if(filter !== 'all' && post.status !== filter) return;
+
+                    list.innerHTML += `
+                        <div class="card">
+                            <img src="${post.img}" class="media-preview" style="max-width: 100%; border: none;">
+                            <div style="margin: 15px 0;">
+                                <span class="status-badge ${post.status === 'kutilmoqda' ? 'pending' : 'cleaned'}">
+                                    ${post.status.toUpperCase()}
+                                </span>
+                                <p style="margin-top: 10px; font-weight: 600;">${post.desc}</p>
+                                <small style="color: #999;">${post.date} | ${post.user}</small>
+                            </div>
+                            ${post.status === 'kutilmoqda' ? 
+                                `<button class="btn btn-primary" onclick="eco.markCleaned(${post.id})"><i class="fas fa-broom"></i> Tozaladim</button>` 
+                                : `<p style="color: var(--primary); font-size: 0.9rem;"><b>Izoh:</b> ${post.cleanNote}</p>`}
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        // --- UI NAVIGATION ---
+        function navigate(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(pageId + '-page').classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(pageId === 'admin') renderAdminLogs();
+            if(pageId === 'cleaners') eco.renderPosts();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const main = document.getElementById('main');
+            sidebar.classList.toggle('closed');
+            main.classList.toggle('expanded');
+        }
+
+        function openModal() { document.getElementById('authModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+
+        function checkAuthUI() {
+            if(currentUser) {
+                document.getElementById('user-display').innerText = currentUser.email;
+                document.getElementById('login-nav').style.display = 'none';
+                document.getElementById('logout-nav').style.display = 'flex';
+                if(currentUser.role === 'admin') {
+                    document.getElementById('admin-link').style.display = 'flex';
+                }
+            }
+        }
+
+        function renderAdminLogs() {
+            const tbody = document.getElementById('admin-logs');
+            tbody.innerHTML = '';
+            db.logs.forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${log.email}</b></td>
+                        <td>${log.time}</td>
+                        <td>${log.photo}</td>
+                        <td><small>${log.gps || 'Noma\'lum'}</small></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Initialize
+        checkAuthUI();
+        eco.renderPosts();
+    </script>
+</body>
+</html><section id="report-page" class="page">
+    <div class="card">
+        <h2><i class="fas fa-camera"></i> Hududni rasmga olish</h2>
+        <br>
+        <div class="form-group">
+            <label>Kamera oynasi</label>
+            <div id="camera-container" style="position: relative; width: 100%; max-width: 400px; background: #000; border-radius: 15px; overflow: hidden;">
+                <video id="video" autoplay playsinline style="width: 100%; display: block; transform: scaleX(-1);"></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button class="btn" style="background: #34495e; color: white;" onclick="eco.startCamera()">
+                    <i class="fas fa-video"></i> Kamerani yoqish
+                </button>
+                <button class="btn btn-primary" onclick="eco.takeSnapshot()">
+                    <i class="fas fa-circle-dot"></i> Rasmga olish
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Olingan rasm ko'rinishi</label>
+            <img src="" id="preview-img" class="media-preview" alt="Snapshot kutilmoqda...">
+        </div>
+
+        <div class="form-group">
+            <label>Tavsif</label>
+            <textarea id="report-desc" placeholder="Chiqindi turi haqida yozing..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="eco.addPost()">Tizimga yuborish</button>
+    </div>
+</section>
